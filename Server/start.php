@@ -9,43 +9,69 @@ require_once __DIR__  . './Autoloader.php';
 $ws_worker = new Worker("websocket://0.0.0.0:2346");
 
 $severTime = 1;
-// 启动4个进程对外提供服务
+
+$timeCountdown = 0;
+
 $ws_worker->count = 1;
+
+$global_uid = 0;
 
 $ws_worker->onWorkerStart = function ($worker) {
 
     Timer::add(1, function () use ($worker) {
         global $severTime;
+        global $timeCountdown;
+        $message = [];
         foreach ($worker->connections as $connection) {
             if ($severTime % 28 == 0) {
-                $connection->send('waiting');
-            } else if ($severTime % 28 == 3) {
-                $connection->send('bet');
-            } else if ($severTime % 28 == 14) {
-                $connection->send('bet end');
-            } else if ($severTime % 28 == 16) {
-                $connection->send('show');
-            } else if ($severTime % 28 == 25) {
-                $connection->send('end');
+                $message = ['commend' => 'change stage', 'stage' => 'waiting'];
+                $timeCountdown = 3;
+                $connection->send(json_encode($message));
+            } else if ($severTime % 28 == 4) {
+                $message = ['commend' => 'change stage', 'stage' => 'bet'];
+                $timeCountdown = 10;
+                $connection->send(json_encode($message));
+            } else if ($severTime % 28 == 15) {
+                $message = ['commend' => 'change stage', 'stage' => 'bet end'];
+                $timeCountdown = 1;
+                $connection->send(json_encode($message));
+            } else if ($severTime % 28 == 17) {
+                $message = ['commend' => 'change stage', 'stage' => 'show'];
+                $timeCountdown = 8;
+                $connection->send(json_encode($message));
+            } else if ($severTime % 28 == 26) {
+                $message = ['commend' => 'change stage', 'stage' => 'end'];
+                $timeCountdown = 1;
+                $connection->send(json_encode($message));
             }
+            $message = ['commend' => 'time countdown', 'time' => $timeCountdown];
+            $connection->send(json_encode($message));
         }
+        if ($timeCountdown != 0) {
+            $timeCountdown--;
+        }
+
         $severTime++;
     });
 };
 
+$ws_worker->onConnect = function ($connection) {
+    global $ws_worker, $global_uid;
+    // 为这个连接分配一个uid
+    $connection->uid = $global_uid;
+    $connection->send(json_encode("your UID" . $connection->uid));
+    $global_uid++;
+};
+
+$ws_worker->onMessage = function ($connection, $data) {
+    global $ws_worker;
+    foreach ($ws_worker->connections as $conn) {
+        $conn->send(json_encode("user[{$connection->uid}] said: $data"));
+    }
+};
 
 
 
-
-// 当收到客户端发来的数据后返回hello $data给客户端
-$ws_worker->onMessage = 'on_mesage';
-
-
-function on_mesage($connection, $data)
-{
-    // 向浏览器发送hello world
-    $connection->send('hello world' . $data);
-}
 
 // 运行
 Worker::runAll();

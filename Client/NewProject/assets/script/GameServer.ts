@@ -58,11 +58,17 @@ export default class GameServer extends cc.Component {
 
         this.register_evnet();
         this.ws.onopen = function (event) {
-            console.log("Send Text WS was opened.");
+            self.ws.send("player1");
         };
         this.ws.onmessage = function (event) {
-            self.gameProcess(event.data);
-            console.log(typeof (event.data) + " " + event.data);
+            let temp = JSON.parse(event.data);
+            if (temp.commend === 'change stage') {
+                self.gameProcess(temp.stage);
+            } else if (temp.commend === 'time countdown') {
+                cc.game.emit("stageTime", temp.time);
+            }
+
+            console.log(event.data);
         };
     }
 
@@ -70,9 +76,7 @@ export default class GameServer extends cc.Component {
 
 
 
-    start() {
-        // this.gameProcess();
-    }
+    // start() { }
 
     // update(dt) { }
 

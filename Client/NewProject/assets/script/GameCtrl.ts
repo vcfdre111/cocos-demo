@@ -50,11 +50,11 @@ export default class GameCtrl extends cc.Component {
                     break;
                 case "bet":
                     cc.game.emit("changePhaseLabel", "Betting Phase");
-                    self.betTime = !self.betTime;
+                    self.betTime = true;
                     break;
                 case "bet end":
                     cc.game.emit("changePhaseLabel", "Bet end");
-                    self.betTime = !self.betTime;
+                    self.betTime = false;
                     break;
                 case "show":
                     cc.game.emit("changePhaseLabel", "Result Phase");
