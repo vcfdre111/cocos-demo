@@ -35,6 +35,9 @@ export default class GameView extends cc.Component {
     @property(cc.Node)
     ChipButtonLabel: cc.Node[] = [null, null, null, null, null]
 
+    @property(cc.Label)
+    TotalBetLabel: cc.Label[] = [null, null, null]
+
 
 
 
@@ -129,6 +132,13 @@ export default class GameView extends cc.Component {
                 newcard.setPosition(spacing, 210);
 
                 spacing += 300;
+            }
+        })
+
+        cc.game.on("total bet", function displayAllPlayerBet(bets: number[]) {
+            for (let index = 0; index < self.TotalBetLabel.length; index++) {
+                self.TotalBetLabel[index].string = bets[index].toString();
+
             }
         })
 

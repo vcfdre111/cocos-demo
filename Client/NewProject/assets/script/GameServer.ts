@@ -38,6 +38,12 @@ export default class GameServer extends cc.Component {
 
     readonly EmptyAres: number[] = [0, 0, 0];
 
+    @property
+    LocalPlayerName: string = null;
+
+    @property
+    LocalPlayerMoney: number = null;
+
 
 
     ws: WebSocket = new WebSocket("ws://localhost:2346/");
@@ -55,10 +61,13 @@ export default class GameServer extends cc.Component {
         this.Data = this.getComponent("GameServerData");
 
         console.log("Game Start!");
-
+        let name = 'player' + (Math.floor(Math.random() * 100)).toString();
         this.register_evnet();
         this.ws.onopen = function (event) {
-            self.ws.send("player1");
+            self.ws.send(JSON.stringify({
+                'commend': 'login',
+                'id': name
+            }));
         };
         this.ws.onmessage = function (event) {
             let temp = JSON.parse(event.data);
@@ -66,6 +75,14 @@ export default class GameServer extends cc.Component {
                 self.gameProcess(temp.stage);
             } else if (temp.commend === 'time countdown') {
                 cc.game.emit("stageTime", temp.time);
+            } else if (temp.commend === 'result card') {
+                self.PokerCard = temp.card;
+            } else if (temp.commend === 'updateInfomation') {
+                self.updateInfomation(temp.name, temp.money);
+                console.log(self.LocalPlayerName + "   " + self.LocalPlayerMoney)
+            } else if (temp.commend === 'bet') {
+                self.TotalBets[temp.area] += +temp.amount;
+                cc.game.emit("total bet", self.TotalBets);
             }
 
             console.log(event.data);
@@ -84,7 +101,12 @@ export default class GameServer extends cc.Component {
     register_evnet() {
         let self = this;
         cc.game.on("receiveLocalBet", function receiveLocalBet(name: string, amount: number, area: number) {
-            self.TotalBets[area] += +amount;
+            self.ws.send(JSON.stringify({
+                'commend': 'bet',
+                'amount': amount,
+                'area': area
+            }))
+
             self.Data.PlayerMoney = -amount;
         })
 
@@ -96,7 +118,10 @@ export default class GameServer extends cc.Component {
     public gameProcess(stage: string) {
         switch (stage) {
             case "waiting":
-                cc.game.emit("updatePlayerInformation", this.getPlayerName(), this.getPlayerMoney())
+                this.ws.send(JSON.stringify({
+                    'commend': 'requireInfomation'
+                }));
+                cc.game.emit("updatePlayerInformation", this.LocalPlayerName, this.LocalPlayerMoney);
                 this.gameWait(stage);
                 break;
             case "bet":
@@ -106,10 +131,13 @@ export default class GameServer extends cc.Component {
                 this.betFinish(stage);
                 break;
             case "show":
+                this.ws.send(JSON.stringify({
+                    'commend': 'requireInfomation'
+                }))
                 this.showResult(stage);
                 break;
             case "end":
-                cc.game.emit("updatePlayerInformation", this.getPlayerName(), this.getPlayerMoney())
+                cc.game.emit("updatePlayerInformation", this.LocalPlayerName, this.LocalPlayerMoney);
                 this.roundEnd(stage);
             default:
                 break;
@@ -123,13 +151,10 @@ export default class GameServer extends cc.Component {
         cc.game.emit("changeStage", stage)
     }
     public betFinish(stage: string) {
-        console.log("Server bets " + this.TotalBets);
         cc.game.emit("changeStage", stage)
-        this.PokerCard = this.creatCard();
         this.cardResult();
     }
     public showResult(stage: string) {
-        this.dealWithMoney()
         cc.game.emit("changeStage", stage)
     }
     public roundEnd(stage: string) {
@@ -138,35 +163,11 @@ export default class GameServer extends cc.Component {
         this.PokerCard = [-1, -1]
         this.Winner = -1;
         this.TotalBets = [...this.EmptyAres];
-        console.log("round end bets " + this.TotalBets);
+        cc.game.emit("total bet", this.TotalBets);
     }
 
-    public getPlayerName(): string {
-        return this.Data.PlayerName;
-    }
-    public getPlayerMoney() {
-        return this.Data.PlayerMoney;
-    }
-
-    private creatCard() {
-        let rdmArray = [2];
-
-        for (let i = 0; i < 2; i++) {
-            let rdm = 0;
-
-            do {
-                var exist = false;
-                rdm = Math.floor(Math.random() * 52);
 
 
-                if (rdmArray.indexOf(rdm) != -1) exist = true;
-
-            } while (exist);
-
-            rdmArray[i] = rdm;
-        }
-        return rdmArray;
-    }
     private cardResult() {
         console.log("Dora: " + (this.PokerCard[0] % 13) + " Tora: " + (this.PokerCard[1] % 13));
         if ((this.PokerCard[0] % 13) > (this.PokerCard[1] % 13)) {
@@ -180,16 +181,10 @@ export default class GameServer extends cc.Component {
 
     }
 
-
-    private dealWithMoney() {
-        if (this.Winner === 1) {
-            this.Data.PlayerMoney = (this.TotalBets[this.Winner] * 9);
-        } else {
-            this.Data.PlayerMoney = (this.TotalBets[this.Winner] * 2);
-        }
+    private updateInfomation(name: string, money: number) {
+        this.LocalPlayerName = name;
+        this.LocalPlayerMoney = money;
     }
-
-
 
 }
 

@@ -38,11 +38,6 @@ export default class GameModel extends cc.Component {
         })
     }
 
-
-
-
-
-
     public getLocalbet(): number[] {
         return this.LocalPlayerBet;
     }
