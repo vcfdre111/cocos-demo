@@ -24,9 +24,6 @@ export default class GameCtrl extends cc.Component {
     betTime = false;
 
     @property
-    GameStage: number[] = [0, 0]
-
-    @property
     Chip: number = 0;
 
     onLoad() {

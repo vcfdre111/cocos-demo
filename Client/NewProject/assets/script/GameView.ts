@@ -124,14 +124,14 @@ export default class GameView extends cc.Component {
             })
 
         cc.game.on("drawCard", function drawCard(cards: number[]) {
-            let spacing = -150;
+            let spacing = -115;
             for (let index = 0; index < 2; index++) {
                 let newcard = cc.instantiate(self.CardPrefab);
                 self.node.addChild(newcard);
                 newcard.getComponent('card').setNum(cards[index]);
-                newcard.setPosition(spacing, 210);
+                newcard.setPosition(spacing, 240);
 
-                spacing += 300;
+                spacing += 230;
             }
         })
 
@@ -152,14 +152,14 @@ export default class GameView extends cc.Component {
      * @param cards recive card number array from server
      */
     public drawCard(cards: number[]) {
-        let spacing = -150;
+        let spacing = -115;
         for (let index = 0; index < 2; index++) {
             let newcard = cc.instantiate(this.CardPrefab);
             this.node.addChild(newcard);
             newcard.getComponent('card').setNum(cards[index]);
-            newcard.setPosition(spacing, 210);
+            newcard.setPosition(spacing, 240);
 
-            spacing += 300;
+            spacing += 230;
         }
     }
 
@@ -171,9 +171,9 @@ export default class GameView extends cc.Component {
      */
     public hightLightChip(event, n: number) {
         this.ChipButtonLabel.forEach(element => {
-            element.color = cc.color(0, 0, 0, 255);
+            element.active = false;
         });
-        this.ChipButtonLabel[+n].color = cc.color(255, 0, 0, 255);
+        this.ChipButtonLabel[+n].active = true;
     }
 
 
