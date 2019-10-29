@@ -38,6 +38,14 @@ export default class GameView extends cc.Component {
     @property(cc.Label)
     TotalBetLabel: cc.Label[] = [null, null, null]
 
+    @property(cc.Prefab)
+    TableChip: cc.Prefab[] = [null, null, null, null, null]
+
+    ChipPool: cc.NodePool[] = [null, null, null, null, null];
+
+    @property(cc.Prefab)
+    WarningLabel: cc.Prefab = null;
+
 
 
 
@@ -47,6 +55,18 @@ export default class GameView extends cc.Component {
 
     onLoad() {
         this.register_evnet();
+        for (let i = 0; i < 5; ++i) {
+            this.ChipPool[i] = new cc.NodePool();
+        }
+
+        let initCount = 10;
+        for (let i = 0; i < this.ChipPool.length; ++i) {
+            for (let j = 0; j < initCount; j++) {
+                let TempChip = cc.instantiate(this.TableChip[i]); // 创建节点
+                this.ChipPool[i].put(TempChip); // 通过 put 接口放入对象池
+            }
+        }
+        console.log(this.ChipPool);
     }
 
     // start() { }
@@ -67,9 +87,35 @@ export default class GameView extends cc.Component {
              */
             function clearCard() {
                 let childs: cc.Node[] = self.node.children;
-                childs.forEach(element => {
-                    element.destroy();
-                });
+                let time = 0;
+                while (childs.length > 0 && time < 9) {
+                    ++time;
+
+                    childs.forEach(element => {
+
+
+                        if (element.name == "chip_1") {
+                            self.ChipPool[0].put(element);
+                            console.log('chip putted to0')
+                        } else if (element.name == "chip_10") {
+                            self.ChipPool[1].put(element);
+                            console.log('chip putted to 1')
+                        } else if (element.name == "chip_50") {
+                            self.ChipPool[2].put(element);
+                            console.log('chip putted to 2')
+                        } else if (element.name == "chip_100") {
+                            self.ChipPool[3].put(element);
+                            console.log('chip putted to 3')
+                        } else if (element.name == "chip_500") {
+                            self.ChipPool[4].put(element);
+                            console.log('chip putted to 4')
+                        } else {
+                            console.log(element.name + '  been destroy');
+                            element.destroy();
+                        }
+                    });
+                }
+                cc.game.emit("cardBack");
             })
 
         cc.game.on("setName",
@@ -135,6 +181,7 @@ export default class GameView extends cc.Component {
             }
         })
 
+
         cc.game.on("total bet", function displayAllPlayerBet(bets: number[]) {
             for (let index = 0; index < self.TotalBetLabel.length; index++) {
                 self.TotalBetLabel[index].string = bets[index].toString();
@@ -142,26 +189,64 @@ export default class GameView extends cc.Component {
             }
         })
 
+        cc.game.on("betToTable", function betToTable(area: number, chip: number) {
+            let temp = -1;
+            switch (+chip) {
+                case 1:
+                    temp = 0;
+                    break;
+                case 10:
+                    temp = 1;
+                    break;
+                case 50:
+                    temp = 2;
+                    break;
+                case 100:
+                    temp = 3;
+                    break;
+                case 500:
+                    temp = 4;
+                    break;
+            }
+            let TempChip = null;
+            if (self.ChipPool[temp].size() > 0) {
+                TempChip = self.ChipPool[temp].get();
+                console.log('created form pool');
+            } else {
+                TempChip = cc.instantiate(self.TableChip[temp]);
+                console.log('created new one');
+            }
+
+            self.node.addChild(TempChip);
+            TempChip.setPosition(0, -200);
+            let goal;
+            switch (+area) {
+                case 0:
+                    goal = cc.v2(-250, 0);
+                    break;
+                case 1:
+                    goal = cc.v2(0, 0);
+                    break;
+                case 2:
+                    goal = cc.v2(250, 0);
+                    break;
+                default:
+                    break;
+            }
+            TempChip.getComponent('Chip').init(goal, self.ChipPool[temp]);
+        })
+
+        cc.game.on("callWarningLabel", function callWarningLabel(text: string) {
+            let newlabel = cc.instantiate(self.WarningLabel);
+            self.node.addChild(newlabel);
+            newlabel.getComponent(cc.Label).string = text;
+        })
     }
 
     // update (dt) {}
 
 
-    /**
-     * draw cards form prefab by card's length times
-     * @param cards recive card number array from server
-     */
-    public drawCard(cards: number[]) {
-        let spacing = -115;
-        for (let index = 0; index < 2; index++) {
-            let newcard = cc.instantiate(this.CardPrefab);
-            this.node.addChild(newcard);
-            newcard.getComponent('card').setNum(cards[index]);
-            newcard.setPosition(spacing, 240);
 
-            spacing += 230;
-        }
-    }
 
     /**
      * change chipbutton's label color by player select to red,

@@ -76,7 +76,8 @@ export default class GameCtrl extends cc.Component {
         })
 
         cc.game.on("returnCard", function sendCard(card: number[]) {
-            cc.game.emit("drawCard", card);
+            cc.game.emit('drawCardAnim', card);
+            //cc.game.emit("drawCard");
         })
 
         cc.game.on("updatePlayerInformation", function returnPlayerInformation(name: string, money: number) {
@@ -103,11 +104,14 @@ export default class GameCtrl extends cc.Component {
             this.Model.LocalPlayerMoney -= this.Chip;
             cc.game.emit("addBet", this.Chip, area);
             cc.game.emit("receiveLocalBet", this.Model.LocalPlayerName, this.Chip, area);
+            cc.game.emit("betToTable", area, this.Chip);
             ;
         } else if (!this.betTime) {
-            console.log("not bet time");
+            cc.game.emit("callWarningLabel", "not bet time")
+            //console.log("not bet time");
         } else {
-            console.log("Betting fail,not enough money")
+            cc.game.emit("callWarningLabel", "Betting fail,not enough money")
+            //console.log("Betting fail,not enough money")
         }
         this.changeBetLabel(area, this.Model.getLocalbet()[area]);
         cc.game.emit("updateMoney", this.Model.LocalPlayerMoney);

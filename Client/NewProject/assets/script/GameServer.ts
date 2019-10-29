@@ -68,7 +68,7 @@ export default class GameServer extends cc.Component {
                 cc.game.emit("total bet", self.TotalBets);
             }
 
-            console.log(event.data);
+
         };
     }
 
@@ -117,13 +117,13 @@ export default class GameServer extends cc.Component {
                 this.betFinish(stage);
                 break;
             case "show":
-                this.ws.send(JSON.stringify({
-                    'commend': 'requireInfomation'
-                }))
+
                 this.showResult(stage);
                 break;
             case "end":
-                cc.game.emit("updatePlayerInformation", this.LocalPlayerName, this.LocalPlayerMoney);
+                this.ws.send(JSON.stringify({
+                    'commend': 'requireInfomation'
+                }))
                 this.roundEnd(stage);
             default:
                 break;
@@ -164,7 +164,7 @@ export default class GameServer extends cc.Component {
             this.Winner = 1;
         }
         console.log("Winner is " + this.Winner);
-
+        cc.game.emit("sendWinner", this.Winner);
     }
 
     private updateInfomation(name: string, money: number) {
