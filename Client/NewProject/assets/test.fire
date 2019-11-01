@@ -41,8 +41,8 @@
     },
     "_scale": {
       "__type__": "cc.Vec3",
-      "x": 0.5358867312681493,
-      "y": 0.5358867312681493,
+      "x": 0.5564453125,
+      "y": 0.5564453125,
       "z": 1
     },
     "_quat": {
@@ -1335,6 +1335,18 @@
     "Model": null,
     "betTime": false,
     "Chip": 0,
+    "BGM": {
+      "__uuid__": "7fe1503f-1ea6-4a6a-84b9-82bd3d3354fa"
+    },
+    "BetTimeAudio": {
+      "__uuid__": "800d41a9-ee9a-4b9b-831e-eaa31af1def5"
+    },
+    "BetTimeEndAudio": {
+      "__uuid__": "119ea897-43f2-43dc-be01-1ba030e9b5f9"
+    },
+    "ChipBtnAudio": {
+      "__uuid__": "c1cff317-e6be-4469-b199-99b264bef463"
+    },
     "_id": "62Ax9blu1Dx4HzE5VoKFYj"
   },
   {
@@ -1369,17 +1381,6 @@
     "CardPrefab": {
       "__uuid__": "b3922d6a-c755-43ab-8c59-163db7346da2"
     },
-    "BetButtons": [
-      {
-        "__id__": 76
-      },
-      {
-        "__id__": 51
-      },
-      {
-        "__id__": 64
-      }
-    ],
     "ChipButtonLabel": [
       {
         "__id__": 21
@@ -1832,7 +1833,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -84,
+      "y": -113,
       "z": 0
     },
     "_scale": {
@@ -2543,7 +2544,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -84,
+      "y": -113,
       "z": 0
     },
     "_scale": {
@@ -3147,7 +3148,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -84,
+      "y": -113,
       "z": 0
     },
     "_scale": {
@@ -5218,7 +5219,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": -2,
-      "y": 219,
+      "y": 272,
       "z": 0
     },
     "_scale": {
@@ -5250,7 +5251,7 @@
     },
     "_enabled": true,
     "_armatureName": "Expecting",
-    "_animationName": "Card_R",
+    "_animationName": "Card_L",
     "_preCacheMode": 0,
     "_cacheMode": 0,
     "playTimes": -1,
@@ -5269,7 +5270,7 @@
       "__uuid__": "3fe5c4d6-7d22-42c4-8ab6-e989d19b6e11"
     },
     "_N$_defaultArmatureIndex": 0,
-    "_N$_animationIndex": 3,
+    "_N$_animationIndex": 2,
     "_N$_defaultCacheMode": 0,
     "_N$timeScale": 1,
     "_N$debugBones": false,
@@ -5284,6 +5285,20 @@
       "__id__": 117
     },
     "_enabled": true,
+    "ShowCard": {
+      "__uuid__": "6e9bb691-ae2f-4ba3-ad4b-fb5e83055a01"
+    },
+    "WinnerAudio": [
+      {
+        "__uuid__": "8cc92272-7a3a-4bc0-8d0d-31c50091bd02"
+      },
+      {
+        "__uuid__": "266b5f0d-844d-4363-9aa5-b215d0e6b926"
+      },
+      {
+        "__uuid__": "6a975775-2bc7-4c47-b32a-69a625a9bca1"
+      }
+    ],
     "_id": "86y7osiGhLQYCVs1h1y01C"
   },
   {

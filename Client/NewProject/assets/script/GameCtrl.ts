@@ -2,14 +2,6 @@ import GameModel from "./GameModel";
 
 const { ccclass, property } = cc._decorator;
 
-export enum Phase {
-    Waiting = 0,
-    Betting = 1,
-    BetEnd = 2,
-    Result = 3,
-    Ending = 4
-
-}
 
 @ccclass
 export default class GameCtrl extends cc.Component {
@@ -26,9 +18,24 @@ export default class GameCtrl extends cc.Component {
     @property
     Chip: number = 0;
 
+    @property(cc.AudioClip)
+    BGM: cc.AudioClip = null;
+
+    @property(cc.AudioClip)
+    BetTimeAudio: cc.AudioClip = null;
+
+    @property(cc.AudioClip)
+    BetTimeEndAudio: cc.AudioClip = null;
+
+    @property(cc.AudioClip)
+    ChipBtnAudio: cc.AudioClip = null;
+
+
+
     onLoad() {
         this.register_evnet();
         this.Model = this.getComponent("GameModel");
+        cc.audioEngine.play(this.BGM, true, .2);
     }
 
     // start() { }
@@ -47,10 +54,12 @@ export default class GameCtrl extends cc.Component {
                     break;
                 case "bet":
                     cc.game.emit("changePhaseLabel", "Betting Phase");
+                    cc.audioEngine.playEffect(self.BetTimeAudio, false);
                     self.betTime = true;
                     break;
                 case "bet end":
                     cc.game.emit("changePhaseLabel", "Bet end");
+                    cc.audioEngine.playEffect(self.BetTimeEndAudio, false);
                     self.betTime = false;
                     break;
                 case "show":
@@ -96,6 +105,7 @@ export default class GameCtrl extends cc.Component {
 
 
     public chipSelect(event, amount: number) {
+        cc.audioEngine.playEffect(this.ChipBtnAudio, false);
         console.log(this.Chip = amount);
     }
 
@@ -104,8 +114,7 @@ export default class GameCtrl extends cc.Component {
             this.Model.LocalPlayerMoney -= this.Chip;
             cc.game.emit("addBet", this.Chip, area);
             cc.game.emit("receiveLocalBet", this.Model.LocalPlayerName, this.Chip, area);
-            cc.game.emit("betToTable", area, this.Chip);
-            ;
+            cc.game.emit("betToTable", area, this.Chip, true);
         } else if (!this.betTime) {
             cc.game.emit("callWarningLabel", "not bet time")
             //console.log("not bet time");

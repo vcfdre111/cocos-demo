@@ -2,6 +2,7 @@
 
 use Workerman\Worker;
 use Workerman\Lib\Timer;
+use player as player;
 
 require_once __DIR__  . './Autoloader.php';
 
@@ -105,23 +106,28 @@ $ws_worker->onMessage = function ($connection, $data) {
         * 实现针对特定uid推送数据
         */
             $ws_worker->uidConnections[$connection->uid] = $connection;
-            $playerData[$connection->uid] = newPlayeyData;
+            $playerData[$connection->uid] = new player($connection->uid, 5000);
             print_r($playerData);
 
-            $message = ['commend' => 'updateInfomation', 'name' => $connection->uid, 'money' => $playerData[$connection->uid][0]];
+            $message = ['commend' => 'updateInfomation', 'name' => $connection->uid, 'money' => $playerData[$connection->uid]->money];
             $connection->send(json_encode($message));
         }
     } else if ($temp->commend == 'bet') {
-        $playerData[$connection->uid][0] -= $temp->amount;
-        $playerData[$connection->uid][($temp->area) + 1] += $temp->amount;
+        $playerData[$connection->uid]->money -= $temp->amount;
+        $playerData[$connection->uid]->bets[($temp->area)] += $temp->amount;
         $totalBet[$temp->area] += $temp->amount;
-        foreach ($ws_worker->connections as $connection) {
+        foreach ($ws_worker->connections as $connection2) {
             $message = ['commend' => 'bet', 'area' => $temp->area, 'amount' => $temp->amount];
-            $connection->send(json_encode($message));
+            $connection2->send(json_encode($message));
+            if ($connection2->uid != $connection->uid) {
+                $message = ['commend' => 'addChip', 'area' => $temp->area, 'amount' => $temp->amount];
+                $connection2->send(json_encode($message));
+            }
         }
+
         print_r($playerData);
     } else if ($temp->commend == 'requireInfomation') {
-        $message = ['commend' => 'updateInfomation', 'name' => $connection->uid, 'money' => $playerData[$connection->uid][0]];
+        $message = ['commend' => 'updateInfomation', 'name' => $connection->uid, 'money' => $playerData[$connection->uid]->money];
         $connection->send(json_encode($message));
     }
 };
@@ -165,11 +171,11 @@ function  dealWithMoney()
     global $playerData;
     if ($winner == 1) {
         foreach ($playerData as $key => $value) {
-            $playerData[$key][0] += ($playerData[$key][$winner + 1] * 9);
+            $playerData[$key]->money += ($playerData[$key]->bets[$winner] * 9);
         }
     } else if ($winner == 0 || $winner == 2) {
         foreach ($playerData as $key => $value) {
-            $playerData[$key][0] += ($playerData[$key][$winner + 1] * 2);
+            $playerData[$key]->money += ($playerData[$key]->bets[$winner] * 2);
         }
     }
 }
@@ -180,12 +186,20 @@ function resetGame()
     $pokerCard = [-1, -1];
     $winner = -1;
     foreach ($playerData as $key => $value) {
-        $playerData[$key][1] = 0;
-        $playerData[$key][2] = 0;
-        $playerData[$key][3] = 0;
+        $playerData[$key]->bets = [0, 0, 0];
     }
     $totalBet = array(0, 0, 0);
 }
+
+function addGlobalChip($uid, $message)
+{
+    global $worker;
+    foreach ($worker->uidConnections as $connection) {
+        $connection->send($message);
+    }
+}
+
+
 
 
 // 运行

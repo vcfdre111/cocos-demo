@@ -1,0 +1,12 @@
+動畫 Card_L:
+
+    Licensing_L / Frame 1
+
+動畫 Card_R:
+
+    Licensing_R / Frame 1
+
+動畫 Switch
+
+    Ready / Frame 12
+    Open / Frame 35

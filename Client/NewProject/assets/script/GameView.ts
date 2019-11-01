@@ -29,8 +29,8 @@ export default class GameView extends cc.Component {
     @property(cc.Prefab)
     CardPrefab: cc.Prefab = null;
 
-    @property(cc.Button)
-    BetButtons: cc.Button[] = [null, null, null];
+    // @property(cc.Button)
+    // BetButtons: cc.Button[] = [null, null, null];
 
     @property(cc.Node)
     ChipButtonLabel: cc.Node[] = [null, null, null, null, null]
@@ -59,7 +59,7 @@ export default class GameView extends cc.Component {
             this.ChipPool[i] = new cc.NodePool();
         }
 
-        let initCount = 10;
+        let initCount = 1000;
         for (let i = 0; i < this.ChipPool.length; ++i) {
             for (let j = 0; j < initCount; j++) {
                 let TempChip = cc.instantiate(this.TableChip[i]); // 创建节点
@@ -189,23 +189,29 @@ export default class GameView extends cc.Component {
             }
         })
 
-        cc.game.on("betToTable", function betToTable(area: number, chip: number) {
+        cc.game.on("betToTable", function betToTable(area: number, chip: number, loacl: boolean) {
             let temp = -1;
+            let position = cc.v2(0, -200);
             switch (+chip) {
                 case 1:
                     temp = 0;
+                    position = cc.v2(25, -250);
                     break;
                 case 10:
                     temp = 1;
+                    position = cc.v2(125, -250);
                     break;
                 case 50:
                     temp = 2;
+                    position = cc.v2(225, -250);
                     break;
                 case 100:
                     temp = 3;
+                    position = cc.v2(325, -250);
                     break;
                 case 500:
                     temp = 4;
+                    position = cc.v2(425, -250);
                     break;
             }
             let TempChip = null;
@@ -218,7 +224,11 @@ export default class GameView extends cc.Component {
             }
 
             self.node.addChild(TempChip);
-            TempChip.setPosition(0, -200);
+            if (loacl) {
+                TempChip.setPosition(position);
+            } else {
+                TempChip.setPosition(-480, -320)
+            }
             let goal;
             switch (+area) {
                 case 0:

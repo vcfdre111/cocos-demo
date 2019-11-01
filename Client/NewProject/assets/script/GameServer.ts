@@ -66,6 +66,8 @@ export default class GameServer extends cc.Component {
             } else if (temp.commend === 'bet') {
                 self.TotalBets[temp.area] += +temp.amount;
                 cc.game.emit("total bet", self.TotalBets);
+            } else if (temp.commend === 'addChip') {
+                cc.game.emit("betToTable", temp.area, temp.amount, false);
             }
 
 
@@ -74,7 +76,7 @@ export default class GameServer extends cc.Component {
 
 
     start() {
-        let name = 'player' + (Math.floor(Math.random() * 100)).toString();
+        let name = 'player' + (Math.floor(Math.random() * 5)).toString();
         this.ws.send(JSON.stringify({
             'commend': 'login',
             'id': name
